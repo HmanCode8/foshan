@@ -1,20 +1,18 @@
 package com.example.mgis.entity.chart;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import java.time.LocalDateTime;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 @Data
-@TableName("user_friend")
-public class UserFriend {
+public class ChatGroup {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String uid;
-    private String friendUid;
-    private Integer status;
-    private Integer isChatting; // 0否 1是
+    private String groupName;
+    private String groupAvatar;
+    private String ownerUsername;
     private LocalDateTime createTime;
+    private String remark;
+    private String groupNickname;
+    private String notice;
 }

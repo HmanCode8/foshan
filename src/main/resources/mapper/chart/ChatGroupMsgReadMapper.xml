@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace 必须完整复制Mapper接口全类名，不能写错 -->
+<mapper namespace="com.example.mgis.controller.mapper.chart.ChatGroupMsgReadMapper">
+
+    <!-- 批量插入未读记录 -->
+    <insert id="insertBatch">
+        INSERT INTO chat_group_msg_read (group_msg_id, group_id, username, is_read)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.groupMsgId}, #{item.groupId}, #{item.username}, #{item.isRead})
+        </foreach>
+    </insert>
+
+    <!-- 批量更新用户该群全部消息为已读 -->
+    <update id="updateAllReadByUser">
+        UPDATE chat_group_msg_read
+        SET is_read = 1, read_time = NOW()
+        WHERE group_id = #{groupId} AND username = #{username} AND is_read = 0
+    </update>
+
+    <!-- 标记单条消息已读 -->
+    <update id="updateSingleMsgRead">
+        UPDATE chat_group_msg_read
+        SET is_read = 1, read_time = NOW()
+        WHERE group_msg_id = #{groupMsgId} AND username = #{username}
+    </update>
+</mapper>

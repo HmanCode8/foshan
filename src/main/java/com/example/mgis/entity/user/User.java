@@ -16,4 +16,5 @@ public class User {
 
     // 新增：在线状态 1=在线 0=离线
     private Integer isOnline;
+    private String avatar; //用户头像的保存路径
 }

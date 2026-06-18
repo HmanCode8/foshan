@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.mgis.common.result.Result;
 import com.example.mgis.entity.user.User;
 import com.example.mgis.controller.mapper.user.UserMapper;
 import com.example.mgis.service.user.UserService;
 import com.example.mgis.untils.EmailUtil;
 import com.example.mgis.untils.JwtUtil;
+import com.example.mgis.websocket.ChatServer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +24,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Autowired
     private UserMapper userMapper;
@@ -39,6 +41,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    // 新增：注入 WebSocket 服务
+    @Autowired
+    private ChatServer chatServer;
+
     // ====================== 登录 ======================
     @Override
     public Result<?> login(User user) {
@@ -49,8 +55,11 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(user.getPassword(), dbUser.getPassword())) {
             return Result.fail("密码错误");
         }
-        //【新增】登录设置在线=1
-        updateOnlineStatus(dbUser.getUsername(),1);
+        // 登录设置在线=1
+        updateOnlineStatus(dbUser.getUsername(), 1);
+
+        // 新增：登录成功，向所有好友推送【上线】状态
+        chatServer.broadcastStatus(dbUser.getUsername(), true);
 
         String token = jwtUtil.generateToken(dbUser.getId(), dbUser.getUsername());
         Map<String, Object> map = new HashMap<>();
@@ -145,5 +154,26 @@ public class UserServiceImpl implements UserService {
         user.setIsOnline(online);
         userMapper.update(user, updateWrapper);
         return Result.success("在线状态修改成功");
+    }
+
+    @Override
+    public Result<?> updateUserAvatar(String username, String avatarUrl) {
+        LambdaUpdateWrapper<User> wrapper = Wrappers.lambdaUpdate();
+        wrapper.eq(User::getUsername, username).set(User::getAvatar, avatarUrl);
+        userMapper.update(null, wrapper);
+        return Result.success("头像更新成功");
+    }
+    /**
+     * 获取用户头像接口实现
+     */
+    @Override
+    public Result<?> getUserAvatar(String username) {
+        User user = getByUsername(username);
+        if (user == null) {
+            return Result.fail("用户不存在");
+        }
+        // 头像为空返回空字符串，前端做默认图兜底
+        String avatar = user.getAvatar() == null ? "" : user.getAvatar();
+        return Result.success(avatar);
     }
 }

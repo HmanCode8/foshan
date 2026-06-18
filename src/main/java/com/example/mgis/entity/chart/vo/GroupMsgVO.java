@@ -1,20 +1,16 @@
-package com.example.mgis.entity.chart;
-
-import com.baomidou.mybatisplus.annotation.TableName;
+package com.example.mgis.entity.chart.vo;
 import lombok.Data;
 import java.time.LocalDateTime;
-
 @Data
-@TableName("chat_msg")
-public class ChatMsg {
+public class GroupMsgVO {
     private Long id;
+    private Long groupId;
     private String sendUsername;
-    private String receiveUsername;
+    private String sendAvatar;
     private String msgContent;
     private Integer msgType;
-    private LocalDateTime createTime;
-    private Integer isRead;
     private String fileUrl;
     private String fileName;
     private String fileSize;
+    private LocalDateTime createTime;
 }

@@ -1,4 +1,4 @@
-package com.example.mgis.entity.chart;
+package com.example.mgis.entity.chart.vo;
 
 import lombok.Data;
 

@@ -1,9 +1,9 @@
-package com.example.mgis.entity.chart;
+package com.example.mgis.entity.chart.dto;
 
 import lombok.Data;
 
 @Data
 public class FriendApplyDTO {
-    private String currentUser;
+    private String applyUser;
     private String friendUser;
 }

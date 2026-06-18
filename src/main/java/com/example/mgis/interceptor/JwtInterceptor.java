@@ -4,6 +4,7 @@ import com.example.mgis.untils.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -17,8 +18,17 @@ public class JwtInterceptor implements HandlerInterceptor {
     @Autowired
     private JwtUtil jwtUtil;
 
+    // 读取配置开关
+    @Value("${jwt.interceptor.enable:true}")
+    private boolean jwtEnable;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // 开关为 false，直接放行所有请求，不做JWT校验
+        if (!jwtEnable) {
+            return true;
+        }
+
         String uri = request.getRequestURI();
         // 放行登录、注册接口
         if (uri.contains("/user/login") || uri.contains("/user/register")) {
@@ -35,15 +45,10 @@ public class JwtInterceptor implements HandlerInterceptor {
 
         String token = authHeader.substring(7);
         try {
-            // 从 token 解析 用户名 / 用户ID（根据你 JwtUtil 实际方法二选一）
             String username = jwtUtil.getUsernameByToken(token);
-            // Long userId = jwtUtil.getUserIdByToken(token);
-
-            // ========== 关键：写入 Security 上下文 ==========
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
         } catch (Exception e) {
             response.setContentType("application/json;charset=utf-8");
             response.setStatus(401);

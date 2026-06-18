@@ -1,5 +1,6 @@
 package com.example.mgis.controller;
 
+import com.example.mgis.common.result.Result;
 import com.example.mgis.service.user.SysUserSettingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -28,15 +29,15 @@ public class UserSettingController {
     // 前端传：{ "username":"admin", "theme":"dark", ... }
     // ============================
     @PostMapping
-    public String saveMySetting(@RequestBody Map<String, Object> settingMap) {
+    public Result<String> saveMySetting(@RequestBody Map<String, Object> settingMap) {
         // 从前端传的参数里拿用户名
         String username = (String) settingMap.get("username");
 
         if (username == null || username.isBlank()) {
-            return "用户名不能为空";
+            return Result.fail("用户名不能为空");
         }
 
         settingService.saveSettingByUsername(username, settingMap);
-        return "ok";
+        return Result.success(username,"ok");
     }
 }
