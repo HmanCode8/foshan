@@ -76,9 +76,11 @@ public class ChatController {
                 .collect(Collectors.toList());
         return Result.success(res);
     }
+
     /**
      * 纯模糊查询用户接口
      * 根据关键字模糊匹配所有用户名，返回所有包含该字符串的用户（不做好友关系过滤）
+     *
      * @param keyword 搜索关键字
      * @return 匹配的用户列表（仅返回用户名、头像、在线状态）
      */
@@ -107,6 +109,7 @@ public class ChatController {
 
         return Result.success(result);
     }
+
     //2、发起添加好友申请
     @PostMapping("/friend/add")
     public Result<String> addFriend(@RequestBody FriendApplyDTO dto) {
@@ -339,6 +342,7 @@ public class ChatController {
     }
 
     // ======================== 【基础群接口：创建/加人/退群/列表/详情/成员/历史消息 保留】 ========================
+
     /**
      * 创建群聊，自动将创建人设置为群主并加入群
      */
@@ -449,6 +453,7 @@ public class ChatController {
         }).collect(Collectors.toList());
         return Result.success(voList);
     }
+
     /**
      * 根据群ID获取群基础详情
      */
@@ -515,6 +520,7 @@ public class ChatController {
 
         return Result.success(vo);
     }
+
     /**
      * 邀请用户进群，支持单人/批量
      */
@@ -525,7 +531,7 @@ public class ChatController {
         List<String> targetUserList = dto.getTargetUserList();
 
         // 参数校验
-        if(targetUserList == null || targetUserList.isEmpty()){
+        if (targetUserList == null || targetUserList.isEmpty()) {
             return Result.fail("请选择需要邀请的用户");
         }
 
@@ -539,16 +545,16 @@ public class ChatController {
         }
 
         // 2.循环处理每一个待邀请用户
-        for(String targetUser : targetUserList){
+        for (String targetUser : targetUserList) {
             // 用户不存在则跳过
             User target = userService.getByUsername(targetUser);
-            if(target == null) continue;
+            if (target == null) continue;
             // 已在群内则跳过
             LambdaQueryWrapper<ChatGroupMember> existWrap = new LambdaQueryWrapper<>();
             existWrap.eq(ChatGroupMember::getGroupId, groupId)
                     .eq(ChatGroupMember::getUsername, targetUser);
             Long existCount = groupMemberMapper.selectCount(existWrap);
-            if(existCount > 0) continue;
+            if (existCount > 0) continue;
 
             // 新增群成员
             ChatGroupMember newMember = new ChatGroupMember();
